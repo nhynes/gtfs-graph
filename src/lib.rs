@@ -2,6 +2,7 @@ extern crate csv;
 extern crate rustc_serialize;
 
 mod loader;
+mod stops;
 
 use std::{error, fmt, num, result};
 pub use stops::{Stop, get_stops};
