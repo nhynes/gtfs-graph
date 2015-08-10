@@ -1,0 +1,4 @@
+[package]
+name = "gtfsgraph"
+version = "0.1.0"
+authors = ["Nick Hynes <nhynes@mit.edu>"]
