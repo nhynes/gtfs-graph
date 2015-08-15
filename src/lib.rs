@@ -1,11 +1,14 @@
 extern crate csv;
 extern crate rustc_serialize;
+extern crate chrono;
 
 mod loader;
 mod stops;
+mod connections;
 
 use std::{error, fmt, num, result};
 pub use stops::{Stop, get_stops};
+pub use connections::{Connection, Trips, Services, get_connections};
 
 // convenience type for Errors returned by this lib
 pub type Result<T> = result::Result<T, Error>;
