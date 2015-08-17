@@ -37,8 +37,9 @@ pub struct Services {
 }
 
 impl Services {
-    pub fn get_running<P: AsRef<Path>>(cal: P, caldates: P, date: NaiveDate) ->
-            Result<Services> {
+    pub fn get_running<P: AsRef<Path>>(cal: P, caldates: P, date: NaiveDate)
+        -> Result<Services>
+    {
         let mut running_svcs = HashSet::new();
 
         let mut cal_rdr = try!(csv::Reader::from_file(cal));

@@ -57,7 +57,9 @@ impl<'a, R: io::Read> Iterator for FilteredRecords<'a, R> {
     }
 }
 
-pub fn decode_csv<'a, R: io::Read, D: Decodable>(rdr: &'a mut csv::Reader<R>, cols: Vec<&str>) -> Result<DecodedFilteredRecords<'a, R, D>> {
+pub fn decode_csv<'a, R: io::Read, D: Decodable>(rdr: &'a mut csv::Reader<R>, cols: Vec<&str>)
+    -> Result<DecodedFilteredRecords<'a, R, D>>
+{
     let headers = try!(rdr.headers());
     let mut inds:Vec<usize> = Vec::with_capacity(cols.len());
 
@@ -77,7 +79,8 @@ pub fn decode_csv<'a, R: io::Read, D: Decodable>(rdr: &'a mut csv::Reader<R>, co
 }
 
 pub fn read_csv<'a, R: io::Read>(rdr: &'a mut csv::Reader<R>, cols: Vec<&str>)
-        -> Result<FilteredRecords<'a, R>> {
+    -> Result<FilteredRecords<'a, R>>
+{
     let headers = try!(rdr.headers());
     let inds = headers.iter().map(|h| cols.iter().position(|c| h == c) ).collect();
 

@@ -4,6 +4,6 @@ version = "0.1.0"
 authors = ["Nick Hynes <nhynes@mit.edu>"]
 
 [dependencies]
+chrono = "0.2.15"
 csv = "0.14.2"
 rustc-serialize = "0.3"
-chrono = "0.2.15"
