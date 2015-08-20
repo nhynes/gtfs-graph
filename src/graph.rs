@@ -3,25 +3,36 @@ use std::cell::UnsafeCell;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::hash::Hash;
-use std::mem;
+use std::iter::Skip;
+use std::slice::Iter;
 use chrono::{NaiveDateTime, Duration};
 use {Result, Error, Stop, Connection};
 
-fn departure_ord(e1: &Edge, e2: &Edge) -> Ordering { e1.departs.cmp(&e2.departs) }
+fn departure_ord(d1: &Departure, d2: &Departure) -> Ordering { d1.time.cmp(&d2.time) }
 
 pub struct Graph<'a> {
     nodes: HashMap<String, UnsafeCell<StopNode<'a>>>,
 }
 
 pub struct StopNode<'g> {
-    stop: &'g Stop,
-    connections: Vec<Edge<'g>>
+    pub stop: &'g Stop,
+    connections: Vec<Departure<'g>>
 }
 
-pub struct Edge<'g> {
-    to: &'g StopNode<'g>,
-    departs: NaiveDateTime,
-    duration: Duration
+pub struct Departure<'g> {
+    pub destination: &'g StopNode<'g>,
+    pub time: NaiveDateTime,
+    pub duration: Duration
+}
+
+impl<'g> StopNode<'g> {
+    pub fn departures_after(&'g self, time: &NaiveDateTime) -> Skip<Iter<'g, Departure>> {
+        let i = match self.connections.binary_search_by(|d| d.time.cmp(time)) {
+            Ok(i) => i,
+            Err(i) => i
+        };
+        self.connections.iter().skip(i)
+    }
 }
 
 impl<'a> Graph<'a> {
@@ -52,9 +63,9 @@ impl<'a> Graph<'a> {
             let from = self.nodes.get(&c.from)
                 .ok_or(Error::Data(format!("Origin stop not found: {}", c.from)));
 
-            let edge = Edge {
-                to: unsafe { &*try!(to).get() },
-                departs: c.departs,
+            let edge = Departure {
+                destination: unsafe { &*try!(to).get() },
+                time: c.departs,
                 duration: c.duration
             };
 

@@ -143,7 +143,8 @@ fn parse_timestamp(s: &String) -> i64 {
 }
 
 pub fn get_connections<P: AsRef<Path>>(times: P, trips: Trips)
-        -> Result<Vec<Connection>> {
+    -> Result<Vec<Connection>>
+{
     let mut rdr = try!(csv::Reader::from_file(times));
     let cols = vec!["arrival_time", "departure_time", "stop_id", "trip_id"];
     let strecs = try!(read_csv::<_>(&mut rdr, cols));

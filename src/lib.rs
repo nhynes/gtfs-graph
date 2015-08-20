@@ -10,7 +10,7 @@ mod stops;
 use std::{error, fmt, num, result};
 pub use stops::{Stop, get_stops};
 pub use connections::{Connection, Trips, Services, get_connections};
-pub use graph::{Graph};
+pub use graph::{Graph, StopNode, Departure};
 
 // convenience type for Errors returned by this lib
 pub type Result<T> = result::Result<T, Error>;
