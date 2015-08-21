@@ -8,39 +8,48 @@ use std::slice::Iter;
 use chrono::{NaiveDateTime, Duration};
 use {Result, Error, Stop, Connection};
 
-fn departure_ord(d1: &Departure, d2: &Departure) -> Ordering { d1.time.cmp(&d2.time) }
+fn departure_ord<T>(d1: &Departure<T>, d2: &Departure<T>) -> Ordering { d1.time.cmp(&d2.time) }
 
-pub struct Graph<'a> {
-    nodes: HashMap<String, UnsafeCell<StopNode<'a>>>,
+pub struct Graph<'a, T: 'a> {
+    nodes: HashMap<String, UnsafeCell<StopNode<'a, T>>>,
 }
 
-pub struct StopNode<'g> {
+pub struct StopNode<'g, T: 'g> {
     pub stop: &'g Stop,
-    connections: Vec<Departure<'g>>
+    connections: Vec<Departure<'g, T>>,
+    data: Option<T>
 }
 
-pub struct Departure<'g> {
-    pub destination: &'g StopNode<'g>,
+pub struct Departure<'g, T: 'g> {
+    pub destination: &'g StopNode<'g, T>,
     pub time: NaiveDateTime,
     pub duration: Duration
 }
 
-impl<'g> StopNode<'g> {
-    pub fn departures_after(&'g self, time: &NaiveDateTime) -> Skip<Iter<'g, Departure>> {
+impl<'g, T> StopNode<'g, T> {
+    pub fn departures_after(&'g self, time: &NaiveDateTime) -> Skip<Iter<'g, Departure<T>>> {
         let i = match self.connections.binary_search_by(|d| d.time.cmp(time)) {
             Ok(i) => i,
             Err(i) => i
         };
         self.connections.iter().skip(i)
     }
+
+    pub fn augment(&'g mut self, data: T) {
+        self.data = Some(data)
+    }
+
+    pub fn get_augment(&'g self) -> &Option<T> {
+        &self.data
+    }
 }
 
-impl<'a> Graph<'a> {
-    pub fn new() -> Graph<'a> {
+impl<'a, T> Graph<'a, T> {
+    pub fn new() -> Graph<'a, T> {
         Graph::with_capacity(0)
     }
 
-    pub fn with_capacity(capacity: usize) -> Graph<'a> {
+    pub fn with_capacity(capacity: usize) -> Graph<'a, T> {
         Graph { nodes: HashMap::with_capacity(capacity) }
     }
 
@@ -51,7 +60,8 @@ impl<'a> Graph<'a> {
         for i in 0..stops.len() {
             let node = StopNode {
                 stop: &stops[i],
-                connections: Vec::new()
+                connections: Vec::new(),
+                data: None
             };
             self.nodes.insert(stops[i].id.to_owned(), UnsafeCell::new(node));
         }
